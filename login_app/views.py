@@ -8,20 +8,21 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes, force_str
 from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import send_mail
-from .forms import RegistrationForm, LoginForm
+from .forms import  LoginForm
 from .models import CustomUser
+from .forms import CustomUserCreationForm
 
 def register(request):
     if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+        form = CustomUserCreationForm(request.POST)
         if form.is_valid():
             user = form.save(commit=False)
-            user.is_active = False  # Deactivate login_app until email is verified
+            user.is_email_verified = False  # Email verification will update this later
             user.save()
             send_verification_email(user, request)
             return render(request, 'login_app/verify_email.html')
     else:
-        form = RegistrationForm()
+        form = CustomUserCreationForm()
     return render(request, 'login_app/register.html', {'form': form})
 
 def send_verification_email(user, request):
